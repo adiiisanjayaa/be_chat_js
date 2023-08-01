@@ -9,20 +9,20 @@ module.exports = {
       host: process.env.POSTGRES_HOST || "localhost",
     },
     migrations: {
-      directory: "./db/migrations",
+      directory: "./apps/db/migrations",
     },
     seeds: {
-      directory: "./db/seeds",
+      directory: "./apps/db/seeds",
     },
   },
   production: {
     client: "pg",
     connection: process.env.DATABASE_URL,
     migrations: {
-      directory: "./db/migrations",
+      directory: "./apps/db/migrations",
     },
     seeds: {
-      directory: "./db/seeds",
+      directory: "./apps/db/seeds",
     },
     ssl: {
       rejectUnauthorized: false,

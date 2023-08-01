@@ -1,6 +1,6 @@
 import * as jwt from "jsonwebtoken";
 import config from "../config/config";
-import Helper from "../utilities/helpers";
+import responseHelper from "../utils/response.helper";
 
 export const verifyUser = (req, res, next) => {
   //Get the jwt token from the head
@@ -14,13 +14,13 @@ export const verifyUser = (req, res, next) => {
     console.log(username);
     console.log(jwtPayload.username);
     if (jwtPayload.username !== username) {
-      res.status(403).json(Helper.errorResponse(401, "Forbidden!"));
+      res.status(403).json(responseHelper.responseError("Forbidden!"));
       return;
     }
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
     //If token is not valid, respond with 401 (unauthorized)
-    res.status(401).json(Helper.errorResponse(401, "Unauthorized!"));
+    res.status(401).json(responseHelper.responseError("Unauthorized!"));
     return;
   }
 

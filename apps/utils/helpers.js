@@ -29,25 +29,8 @@ export function excludePassword() {
   };
 }
 
-export function successResponse(status, message, data) {
-  return {
-    status: status,
-    message: message,
-    data: data,
-  };
-}
-
-export function errorResponse(code, message) {
-  return {
-    code: code,
-    message: message,
-  };
-}
-
 module.exports = {
   hashPassword,
   checkIfUnencryptedPasswordIsValid,
   excludePassword,
-  errorResponse,
-  successResponse,
 };
