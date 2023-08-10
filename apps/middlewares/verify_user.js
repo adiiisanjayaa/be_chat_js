@@ -1,6 +1,6 @@
-import * as jwt from "jsonwebtoken";
-import config from "../config/config";
-import responseHelper from "../utils/response.helper";
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/config");
+const { responseError } = require("../utils/response.helper");
 
 export const verifyUser = (req, res, next) => {
   //Get the jwt token from the head
@@ -10,17 +10,17 @@ export const verifyUser = (req, res, next) => {
 
   //Try to validate the token and get data
   try {
-    jwtPayload = jwt.verify(token, config.jwtSecret);
+    jwtPayload = jwt.verify(token, JWT_SECRET);
     console.log(username);
     console.log(jwtPayload.username);
     if (jwtPayload.username !== username) {
-      res.status(403).json(responseHelper.responseError("Forbidden!"));
+      res.status(403).json(responseError("Forbidden!"));
       return;
     }
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
     //If token is not valid, respond with 401 (unauthorized)
-    res.status(401).json(responseHelper.responseError("Unauthorized!"));
+    res.status(401).json(responseError("Unauthorized!"));
     return;
   }
 

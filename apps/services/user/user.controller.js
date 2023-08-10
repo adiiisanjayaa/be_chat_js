@@ -1,86 +1,86 @@
-// import { PrismaClient } from "@prisma/client";
-// import Helper from "../utilities/helpers";
-import { successResponse, errorResponse } from "../utilities/helpers";
+const { responseError, responseOk } = require("../../utils/response.helper");
+const knex = require("../../db/knex");
 
 //get user by username
 async function getByUsername(req, res, next) {
   const { username } = req.params;
 
-  //initialize prisma client
-  const prisma = new PrismaClient();
-  let user;
+  let user = null;
   try {
-    user = await prisma.tb_users.findUnique({
-      where: { username: String(username) },
-      select: Users.excludePassword(),
-    });
+    user = await knex.select().from("users").where("username", username);
   } catch (error) {
-    return res.json(errorResponse(500, "Failed to get users"));
+    return res.status(500).json(responseError("Failed to get users"));
   }
-  if (user == null) {
-    return res.json(errorResponse(404, "User not found!"));
+  if (user.length == 0) {
+    return res.status(404).json(responseError("User not found!"));
+  } else {
+    delete user[0]["password"];
+    const finalUser = user[0];
+    return res.status(200).json(responseOk("Success", finalUser));
   }
-  return res.json(successResponse(200, "Success", user));
 }
 
 //update by username
 async function updateByUsername(req, res, next) {
   const { username } = req.params;
   const { name, email, phone, address } = req.body;
-  if (!name) {
-    return res.status(400).json(errorResponse(400, "Name cannot be empty!"));
+  if (!(name && email && phone && address)) {
+    return res.status(400).json(responseError("Field cannot be empty!"));
   }
 
-  //initialize prisma client
-  const prisma = new PrismaClient();
   let user;
+  let updatedData;
   try {
-    let findUser = await prisma.tb_users.findUnique({
-      where: { username: username },
-    });
+    let findUser = await knex
+      .select()
+      .from("users")
+      .where("username", username);
     if (findUser == null) {
-      return res.json(errorResponse(404, "User not found!"));
+      return res.status(404).json(responseError("User not found!"));
     }
-    user = await prisma.tb_users.update({
-      data: {
-        name: name,
-        email: email,
-        phone: phone,
-        address: address,
-        updatedAt: new Date(),
-      },
-      where: { username: username },
-      select: Users.excludePassword(),
-    });
+    updatedData = {
+      name: name,
+      email: email,
+      phone: phone,
+      address: address,
+      updated_at: new Date(),
+    };
+    user = await knex("users").where("username", username).update(updatedData);
   } catch (error) {
-    return res.json(errorResponse(500, "Failed to update user"));
+    console.log(error);
+    return res.status(400).json(responseError("Failed to update user"));
   }
   res.clearCookie("accessToken");
-  return res.json(successResponse(200, "Success", user));
+  return res.status(200).json(responseOk("Success", updatedData));
 }
 
 //delete by username
 async function deteleByUsername(req, res, next) {
   const { username } = req.params;
-  //initialize prisma client
-  const prisma = new PrismaClient();
   let user;
   try {
-    let findUser = await prisma.tb_users.findUnique({
-      where: { username: username },
-    });
-    if (findUser == null) {
-      return res.json(errorResponse(404, "User not found!"));
+    let exists = await knex.select().from("users").where("username", username);
+    console.log(exists);
+    if (exists.length == 0) {
+      return res.status(400).json(responseError("User not found!"));
     }
-    user = await prisma.tb_users.delete({
-      where: { username: username },
-      select: Users.excludePassword(),
-    });
+
+    if (exists[0].username === username) {
+      knex("users")
+        .where("username", username)
+        .del()
+        .then(function () {
+          return res
+            .status(200)
+            .json(responseOk("Success", "Deleted username " + username));
+        });
+    } else {
+      return res.status(500).json(responseError("Failed to delete user"));
+    }
   } catch (error) {
-    return res.json(errorResponse(500, "Failed to delete user"));
+    return res.status(500).json(responseError("Failed to delete user"));
   }
   res.clearCookie("accessToken");
-  return res.json(successResponse(200, "Success", user));
 }
 
 module.exports = {

@@ -1,22 +1,19 @@
-import * as bcrypt from "bcryptjs";
+const bcrypt = require("bcryptjs");
 
 //hash password
-export function hashPassword(password) {
+function hashPassword(password) {
   if (password != undefined && password != "") {
     password = bcrypt.hashSync(password, 8);
     return password;
   }
 }
 //checkk if unencrypted password is valid
-export function checkIfUnencryptedPasswordIsValid(
-  password,
-  unencryptedPassword
-) {
+function checkIfUnencryptedPasswordIsValid(password, unencryptedPassword) {
   return bcrypt.compareSync(unencryptedPassword, password);
 }
 
 //exclude password
-export function excludePassword() {
+function excludePassword() {
   return {
     uid: true,
     name: true,
