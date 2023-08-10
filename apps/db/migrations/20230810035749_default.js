@@ -19,7 +19,7 @@ exports.up = async function (knex) {
     table.increments("id_room").primary().unique();
     table.string("name");
     table.string("type").notNullable();
-    table.specificType("delete_by", "integer ARRAY");
+    table.specificType("deleted_by", "integer ARRAY");
     table.specificType("read_by", "integer ARRAY");
     table.integer("total_unread");
     table.date("created_at").notNullable();
