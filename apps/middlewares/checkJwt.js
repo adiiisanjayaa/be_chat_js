@@ -12,6 +12,7 @@ const checkJwt = (req, res, next) => {
     jwtPayload = jwt.verify(token, JWT_SECRET);
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
+    console.log(error);
     //If token is not valid, respond with 401 (unauthorized)
     res.status(401).json(responseError("Unauthorized!"));
     return;

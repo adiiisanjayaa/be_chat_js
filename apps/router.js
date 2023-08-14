@@ -10,10 +10,9 @@ const messageRouter = require("./services/message/message.router");
 const apiKeyMiddleware = require("./middlewares/api_key_middleware");
 
 const mainApp = express();
+mainApp.use(cors({ origin: "*" }), helmet(), morgan("tiny"));
 mainApp.use(express.json());
 mainApp.use(userRouter, authRouter, messageRouter, apiKeyMiddleware);
-
-mainApp.use(cors(), helmet(), morgan("tiny"));
 
 //use handle error
 mainApp.use(function (_req, res, next) {
