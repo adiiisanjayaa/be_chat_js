@@ -20,6 +20,25 @@ async function getByUsername(req, res, next) {
   }
 }
 
+async function getAllUser(req, res, next) {
+  const { username } = req.params;
+  let user = null;
+  try {
+    user = await knex
+      .select("uid_users", "name", "username", "phone", "address", "email")
+      .from("users")
+      .whereNot("username", username);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(responseError("Failed to get users"));
+  }
+  if (user.length == 0) {
+    return res.status(404).json(responseError("User not found!"));
+  } else {
+    return res.status(200).json(responseOk("Success", user));
+  }
+}
+
 //update by username
 async function updateByUsername(req, res, next) {
   const { username } = req.params;
@@ -87,4 +106,5 @@ module.exports = {
   getByUsername,
   updateByUsername,
   deteleByUsername,
+  getAllUser,
 };

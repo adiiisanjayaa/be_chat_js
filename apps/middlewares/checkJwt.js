@@ -22,7 +22,7 @@ const checkJwt = (req, res, next) => {
   //We want to send a new token on every request
   const { userId, username } = jwtPayload;
   const newToken = jwt.sign({ userId, username }, JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "24h",
   });
   res.setHeader("token", newToken);
 

@@ -1,5 +1,6 @@
 const { responseError, responseOk } = require("../../utils/response.helper");
 const knex = require("../../db/knex");
+const { seperated } = require("../../config/config");
 
 //get all room
 async function getAllRoom(req, res, next) {
@@ -32,15 +33,19 @@ async function checkRoom(req, res, next) {
     let checkRoom = await knex
       .select()
       .from("rooms")
-      .whereIn("id_room", [idUser1 + idUser2, idUser2 + idUser1]);
+      .whereIn("id_room", [
+        `${idUser1}${seperated}${idUser2}`,
+        `${idUser2}${seperated}${idUser1}`,
+      ]);
 
     console.log("check room : ", checkRoom);
     if (checkRoom.length == 0 || checkRoom == undefined) {
       data = {
-        id_room: idUser1 + idUser2,
+        id_room: `${idUser1}${seperated}${idUser2}`,
         name: name,
         type: type,
         deleted_by: [],
+        last_chat: "",
         read_by: [],
         created_at: new Date(),
         updated_at: new Date(),
@@ -48,15 +53,17 @@ async function checkRoom(req, res, next) {
       await knex("rooms").insert(data);
 
       await knex("participants").insert({
-        id_room: idUser1 + idUser2,
+        id_room: `${idUser1}${seperated}${idUser2}`,
         uid_users: idUser1,
+        uid_users2: idUser2,
         created_at: new Date(),
         updated_at: new Date(),
       });
 
       await knex("participants").insert({
-        id_room: idUser1 + idUser2,
+        id_room: `${idUser1}${seperated}${idUser2}`,
         uid_users: idUser2,
+        uid_users2: idUser1,
         created_at: new Date(),
         updated_at: new Date(),
       });
@@ -65,10 +72,10 @@ async function checkRoom(req, res, next) {
     }
   } catch (error) {
     console.log(error);
-    return res.json(responseError("Failed to create room"));
+    return res.status(400).json(responseError("Failed to create room"));
   }
   if (data == null) {
-    return res.json(responseError("Failed to create room"));
+    return res.status(404).json(responseError("Failed to create room"));
   }
   return res.json(responseOk("Success", data));
 }
@@ -121,8 +128,9 @@ async function getRecentChat(req, res, next) {
     data = await knex
       .from("participants")
       .join("rooms", "rooms.id_room", "participants.id_room")
-      .select("participants.*", "rooms.*")
-      .where("uid_users", idUser)
+      .join("users", "users.uid_users", "participants.uid_users2")
+      .select("participants.*", "rooms.*", "users.name")
+      .where("participants.uid_users", idUser)
       .whereRaw("? != ALL(deleted_by)", idUser);
 
     console.log(data);
@@ -242,6 +250,22 @@ async function deleteChat(req, res, next) {
   return res.status(200).json(responseOk("Success", data));
 }
 
+async function deleteChatAll(req, res, next) {
+  const { idRoom } = req.params;
+
+  let data;
+  try {
+    data = await knex.del().from("rooms").where("id_room", idRoom);
+  } catch (error) {
+    console.log("Error update to delete room: ", error);
+    return res.status(500).json(responseError("Failed to delete chat"));
+  }
+  if (data == null) {
+    return res.status(500).json(responseError("Failed to delete chat"));
+  }
+  return res.status(200).json(responseOk("Success", data));
+}
+
 module.exports = {
   getAllRoom,
   checkRoom,
@@ -250,4 +274,5 @@ module.exports = {
   getRecentChat,
   sentChat,
   updateRoom,
+  deleteChatAll,
 };

@@ -10,6 +10,7 @@ const {
   detailChat,
   sentChat,
   deleteChat,
+  deleteChatAll,
 } = require("./message.controller");
 
 // USER PATH
@@ -33,5 +34,10 @@ router.get(`${MESSAGE_PATH_V1}/detail/:idRoom`, [checkJwt], detailChat);
 router.post(`${MESSAGE_PATH_V1}/sent`, [checkJwt], sentChat);
 //delete chat
 router.put(`${MESSAGE_PATH_V1}/room/delete/:idRoom`, [checkJwt], deleteChat);
+router.delete(
+  `${MESSAGE_PATH_V1}/room/delete/:idRoom`,
+  [checkJwt],
+  deleteChatAll
+);
 
 module.exports = router;

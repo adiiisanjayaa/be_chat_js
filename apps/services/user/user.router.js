@@ -6,6 +6,7 @@ const {
   getByUsername,
   updateByUsername,
   deteleByUsername,
+  getAllUser,
 } = require("./user.controller");
 
 // USER PATH
@@ -15,6 +16,7 @@ router.get(`${USER_PATH_V1}/ping`, (req, res) => {
   res.status(200).json({ ping: "OK" });
 });
 
+router.get(`${USER_PATH_V1}/:username`, checkJwt, getAllUser);
 router.get(`${USER_PATH_V1}/:username`, checkJwt, getByUsername);
 router.put(`${USER_PATH_V1}/update/:username`, updateByUsername);
 router.delete(`${USER_PATH_V1}/delete/:username`, deteleByUsername);
